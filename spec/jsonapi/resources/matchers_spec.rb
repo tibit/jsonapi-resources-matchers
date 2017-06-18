@@ -10,8 +10,20 @@ describe JSONAPI::Resources::Matchers do
     describe "attributes" do
       let(:author) { Author.new(name: "name") }
       subject(:resource) { AuthorResource.new(author, {}) }
-      it { is_expected.to have_attribute(:name) }
-      it { is_expected.to_not have_attribute(:created_at) }
+      context 'original without testing attribute value' do
+        it { is_expected.to have_attribute(:name) }
+        it { is_expected.to_not have_attribute(:created_at) }
+      end
+      context 'with attribute value tested' do
+        it { is_expected.to have_attribute( :name, eq('name')) }
+        it { is_expected.to_not have_attribute( :name, eq('fred')) }
+        it { is_expected.to have_attribute( :name, start_with('na')) }
+        it { is_expected.to have_attribute( :name, start_with('fr')) }
+        it { is_expected.to have_attribute( :name, match(/a/))  }
+        it { is_expected.to have_attribute( :name, match(/b/))  }
+        it { is_expected.to have_attribute( :name, 'name')  }
+        it { is_expected.to have_attribute( :name, 'fred')  }
+      end
     end
 
     describe "sortable fields" do

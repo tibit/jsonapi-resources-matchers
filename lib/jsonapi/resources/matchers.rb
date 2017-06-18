@@ -27,8 +27,8 @@ module JSONAPI
         HaveSortableField.new(name)
       end
 
-      def have_attribute(name)
-        HaveAttribute.new(name)
+      def have_attribute(name, matcher=nil)
+        HaveAttribute.new(name, matcher)
       end
 
       def filter(name)
