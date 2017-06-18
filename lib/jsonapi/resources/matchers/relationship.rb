@@ -7,7 +7,8 @@ module JSONAPI
                       :relationship_type,
                       :resource,
                       :expected_class_name,
-                      :expected_relation_name)
+                      :expected_relation_name,
+                      :expected_related_record)
 
         def initialize(relationship_type, name)
           self.relationship_type = relationship_type
@@ -26,7 +27,8 @@ module JSONAPI
           self.resource = resource
 
           is_serializable? &&
-          has_key_in_relationships? &&
+            has_key_in_relationships? &&
+            matches_related_record? &&
             matches_class_name? &&
             matches_relation_name?
         end
@@ -38,10 +40,10 @@ module JSONAPI
         def has_key_in_relationships?
           serialized_hash = JSONAPI::ResourceSerializer.new(resource.class).
             serialize_to_hash(resource).with_indifferent_access
-          expected_key = JSONAPI.configuration.key_formatter.format(name.to_s)
-          relationships = serialized_hash["data"]["relationships"]
-          return false if relationships.nil?
-          relationships.has_key?(expected_key)
+          @expected_key = JSONAPI.configuration.key_formatter.format(name.to_s)
+          @relationships = serialized_hash["data"]["relationships"]
+          return false if @relationships.nil?
+          @relationships.has_key?(@expected_key)
         end
 
         def with_class_name(name)
@@ -54,6 +56,11 @@ module JSONAPI
           self
         end
 
+        def with_related_record(record)
+          self.expected_related_record = record
+          self
+        end
+
         def failure_message
           resource_name = resource.class.name.demodulize
           message = ["expected `#{resource_name}` to #{humanized_relationship_type} `#{name}`"]
@@ -62,6 +69,9 @@ module JSONAPI
           end
           if self.expected_relation_name
             message << "with relation name `#{self.expected_relation_name}`"
+          end
+          if self.expected_related_record
+            message << "with related record `#{self.expected_related_record}` "
           end
           message.join(" ")
         end
@@ -80,6 +90,11 @@ module JSONAPI
           self.expected_relation_name == actual_relation_name
         end
 
+        def matches_related_record?
+          return true if self.expected_related_record.nil?
+          primary_key= resource.class._relationships[name].primary_key
+          @relationships.dig(@expected_key,'data','id') == self.expected_related_record[primary_key].to_s
+        end
       end
     end
   end

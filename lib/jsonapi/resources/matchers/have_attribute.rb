@@ -31,8 +31,12 @@ module JSONAPI
 
         def failure_message
           resource_name = resource.class.name.demodulize
-          %Q(#{matcher&.failure_message} for #{resource_name} attribute #{name}) if @attribute_found
-          %Q(expected #{resource_name} to have attribute #{name}) unless @attribute_found
+          if @attribute_found
+            msg= %Q(#{matcher&.failure_message} for #{resource_name} attribute #{name})
+          else
+            msg= %Q(expected #{resource_name} to have attribute #{name})
+          end
+          msg
         end
 
         def description

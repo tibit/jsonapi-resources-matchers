@@ -18,11 +18,11 @@ describe JSONAPI::Resources::Matchers do
         it { is_expected.to have_attribute( :name, eq('name')) }
         it { is_expected.to_not have_attribute( :name, eq('fred')) }
         it { is_expected.to have_attribute( :name, start_with('na')) }
-        it { is_expected.to have_attribute( :name, start_with('fr')) }
+        it { is_expected.to_not have_attribute( :name, start_with('fr')) }
         it { is_expected.to have_attribute( :name, match(/a/))  }
-        it { is_expected.to have_attribute( :name, match(/b/))  }
+        it { is_expected.to_not have_attribute( :name, match(/b/))  }
         it { is_expected.to have_attribute( :name, 'name')  }
-        it { is_expected.to have_attribute( :name, 'fred')  }
+        it { is_expected.to_not have_attribute( :name, 'fred')  }
       end
     end
 
@@ -66,10 +66,18 @@ describe JSONAPI::Resources::Matchers do
     describe "have one" do
       let(:book) { Book.new(id: 2) }
       subject(:resource) { LibroResource.new(book, {}) }
-      it { is_expected.to have_one(:author) }
-      it { is_expected.to have_one(:author).with_class_name("Writer") }
-      it { is_expected.to have_one(:author).with_relation_name(:writer) }
+      context 'original without testing related record' do
+        it { is_expected.to have_one(:author) }
+        it { is_expected.to have_one(:author).with_class_name("Writer") }
+        it { is_expected.to have_one(:author).with_relation_name(:writer) }
+      end
+      context 'testing related record' do
+        let(:author) { Author.create(name: "name") }
+        let(:book) { Book.create(author: author) }
+        it { is_expected.to have_one(:writer).with_related_record( author) }
+      end
     end
+
 
     describe "model name" do
       let(:book) { Book.new(id: 2) }
@@ -85,5 +93,4 @@ describe JSONAPI::Resources::Matchers do
       it { is_expected.to_not have_primary_key(:id) }
     end
   end
-
 end
