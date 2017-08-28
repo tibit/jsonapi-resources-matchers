@@ -93,7 +93,13 @@ module JSONAPI
         def matches_related_record?
           return true if self.expected_related_record.nil?
           primary_key= resource.class._relationships[name].primary_key
-          @relationships.dig(@expected_key,'data','id') == self.expected_related_record[primary_key].to_s
+          data = @relationships[@expected_key][:data]
+          return false unless data
+          if data.is_a?(Array)
+            @relationships[@expected_key][:data].map {|h| h['id']}.include?(self.expected_related_record[primary_key].to_s)
+          else
+            @relationships[@expected_key][:data]['id'] == self.expected_related_record[primary_key].to_s
+          end
         end
       end
     end

@@ -24,6 +24,10 @@ module JSONAPI
           %Q(expected `#{resource_name}` to use primary key `#{self.expected_primary_key}`)
         end
 
+        def failure_message_when_negated
+          resource_name = resource.class.name.demodulize
+          %Q(expected `#{resource_name}` to not use `#{self.expected_primary_key}` as primary key)
+        end
       end
     end
   end

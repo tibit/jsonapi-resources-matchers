@@ -1,11 +1,10 @@
 class AuthorResource < JSONAPI::Resource
 
-  primary_key :name
+  primary_key :id
   attributes :name, :address, :birth_name
   filters :name
 
-  has_many :books
-  has_many :libros, class_name: "Book", relation_name: :books
+  has_many :books, class_name: "Book", relation_name: :books, always_include_linkage_data: true
 
   def self.creatable_fields(context)
     super - [:address]

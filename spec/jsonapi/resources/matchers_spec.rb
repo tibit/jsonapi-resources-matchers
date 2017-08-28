@@ -8,7 +8,7 @@ describe JSONAPI::Resources::Matchers do
 
   describe "resource matchers", type: :resource do
     describe "attributes" do
-      let(:author) { Author.new(name: "name") }
+      let(:author) { Author.new(name: "name", id: 1) }
       subject(:resource) { AuthorResource.new(author, {}) }
       context 'original without testing attribute value' do
         it { is_expected.to have_attribute(:name) }
@@ -55,33 +55,34 @@ describe JSONAPI::Resources::Matchers do
     end
 
     describe "have many" do
-      let(:author) { Author.new(name: "name") }
+      let!(:author) { Author.create(name: "name") }
+      let!(:book) { Book.create(author: author) }
       subject(:resource) { AuthorResource.new(author, {}) }
       it { is_expected.to have_many(:books) }
-      it { is_expected.to have_many(:libros).with_class_name("Book") }
-      it { is_expected.to have_many(:libros).with_relation_name(:books) }
+      it { is_expected.to have_many(:books).with_class_name("Book") }
+      it { is_expected.to have_many(:books).with_relation_name(:books).with_related_record(book) }
       it { is_expected.to_not have_many(:fans) }
     end
 
     describe "have one" do
       let(:book) { Book.new(id: 2) }
-      subject(:resource) { LibroResource.new(book, {}) }
+      subject(:resource) { BookResource.new(book, {}) }
       context 'original without testing related record' do
         it { is_expected.to have_one(:author) }
-        it { is_expected.to have_one(:author).with_class_name("Writer") }
-        it { is_expected.to have_one(:author).with_relation_name(:writer) }
+        it { is_expected.to have_one(:author).with_class_name("Author") }
+        it { is_expected.to have_one(:author).with_relation_name(:author) }
       end
       context 'testing related record' do
         let(:author) { Author.create(name: "name") }
         let(:book) { Book.create(author: author) }
-        it { is_expected.to have_one(:writer).with_related_record( author) }
+        it { is_expected.to have_one(:author).with_related_record( author) }
       end
     end
 
 
     describe "model name" do
       let(:book) { Book.new(id: 2) }
-      subject(:resource) { LibroResource.new(book, {}) }
+      subject(:resource) { BookResource.new(book, {}) }
       it { is_expected.to have_model_name("Book") }
       it { is_expected.to_not have_model_name("Libro") }
     end
@@ -89,8 +90,8 @@ describe JSONAPI::Resources::Matchers do
     describe "primary key" do
       let(:author) { Author.new(name: "name") }
       subject(:resource) { AuthorResource.new(author, {}) }
-      it { is_expected.to have_primary_key(:name) }
-      it { is_expected.to_not have_primary_key(:id) }
+      it { is_expected.to have_primary_key(:id) }
+      it { is_expected.to_not have_primary_key(:name) }
     end
   end
 end

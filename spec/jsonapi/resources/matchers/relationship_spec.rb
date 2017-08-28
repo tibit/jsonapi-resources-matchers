@@ -49,7 +49,7 @@ module JSONAPI::Resources::Matchers
         end
 
         it "checks that the relation name matches" do
-          matcher = described_class.new(:have_many, :libros)
+          matcher = described_class.new(:have_many, :books)
 
           matcher.with_relation_name(:bookers)
           expect(matcher.matches?(resource)).to be false
